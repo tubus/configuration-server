@@ -1,0 +1,153 @@
+import java.text.SimpleDateFormat
+
+plugins {
+    id 'java'
+    id 'maven-publish'
+    id 'war'
+    id 'idea'
+    id 'org.springframework.boot' version '2.3.4.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+    id 'com.vaadin' version '0.17.0.1'
+    id 'net.nemerosa.versioning' version "2.14.0"
+}
+
+group = 'com.github.tubus'
+version = '0.0.1-SNAPHSOT'
+
+sourceCompatibility = '11'
+targetCompatibility = '11'
+
+configurations {
+    developmentOnly
+    runtimeClasspath {
+        extendsFrom developmentOnly
+    }
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven { url "https://repo.spring.io/snapshot" }
+    maven { url "https://repo.spring.io/milestone" }
+    maven { url "https://plugins.gradle.org/m2/" }
+    maven { url "https://maven.vaadin.com/vaadin-addons" }
+    maven { url "https://maven.vaadin.com/vaadin-prereleases/" }
+}
+
+ext {
+    set('vaadinVersion', "17.0.7")
+    set('vaadin.compatibilityMode', true)
+    set('lombokVersion', "1.18.10")
+}
+
+build {
+    dependsOn 'vaadinClean'
+    dependsOn 'vaadinPrepareFrontend'
+}
+
+
+def hibernateApiVersion = "1.0.2.Final"
+def hibernateTypesVersion = "2.2.3"
+
+
+dependencies {
+    /// Spring Framework
+    developmentOnly('org.springframework.boot:spring-boot-devtools')
+    implementation('org.springframework.boot:spring-boot-starter-actuator')
+    implementation('org.springframework.cloud:spring-cloud-config-server:2.2.5.RELEASE')
+    implementation('org.springframework.boot:spring-boot-starter-security')
+    implementation('org.springframework.boot:spring-boot-starter-web')
+    implementation('org.springframework.boot:spring-boot-starter-data-jpa')
+    implementation('org.springframework.security:spring-security-web')
+    implementation('org.springframework.security:spring-security-config')
+    implementation('org.liquibase:liquibase-core:4.1.1')
+    implementation("com.vladmihalcea:hibernate-types-52:${hibernateTypesVersion}")
+    implementation("com.vladmihalcea:hibernate-types-parent:${hibernateTypesVersion}")
+
+    /// Vaadin Framework
+    implementation 'com.vaadin:vaadin'
+    implementation 'com.vaadin:vaadin-spring-boot-starter'
+    implementation 'org.vaadin.maxime:markdown-area:1.0.2'
+    implementation 'ch.carnet.kasparscherrer:language-select:1.0.8'
+
+    /// Utils
+    implementation "org.passay:passay:1.6.0"
+
+    /// Drivers
+    implementation('org.postgresql:postgresql')
+
+    /// Annotation Processing
+    compileOnly("org.projectlombok:lombok:${lombokVersion}")
+    annotationProcessor(
+            "org.hibernate.javax.persistence:hibernate-jpa-2.1-api:${hibernateApiVersion}",
+            "org.projectlombok:lombok:${lombokVersion}"
+    )
+
+    /// Test by Jupiter
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+    testImplementation('com.vaadin:vaadin-testbench')
+    testImplementation('io.github.bonigarcia:webdrivermanager:3.8.1')
+
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "com.vaadin:vaadin-bom:${vaadinVersion}"
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+springBoot {
+    mainClassName = 'com.github.tubus.ui.Application'
+}
+
+versioning.info.tag = version
+versioning.info.display = version
+
+versionFile {
+    file = new File(project.buildDir, 'version.properties')
+    prefix = 'VERSION_'
+}
+
+bootJar {
+    dependsOn 'versionFile'
+    dependsOn 'vaadinPrepareFrontend'
+    dependsOn 'vaadinBuildFrontend'
+    from('build') {
+        include 'version.properties'
+        into 'META-INF'
+    }
+    manifest {
+        attributes(
+                'Start-Class'      : "com.github.tubus.ui.Application",
+                'Main-Class'       : "com.github.tubus.ui.Application",
+                'Build-Jdk'        : "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})",
+                'Build-OS'         : "${System.properties['os.name']} ${System.properties['os.arch']} ${System.properties['os.version']}",
+                'Built-By'         : System.properties['user.name'],
+                'Build-Timestamp'  : new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date()),
+                'Build-Scm'        : versioning.info.scm,
+                'Build-BranchType' : versioning.info.branchType,
+                'Build-BranchId'   : versioning.info.branchId,
+                'Build-Branch'     : versioning.info.branch,
+                'Build-Commit'     : versioning.info.commit,
+                'Build-Build'      : versioning.info.build,
+                'Build-Full'       : versioning.info.full,
+                'Build-Base'       : versioning.info.base,
+                'Build-Display'    : versioning.info.display,
+                'Build-Dirty'      : versioning.info.dirty,
+                'Build-Tag'        : versioning.info.tag == null ? "undefined" : versioning.info.tag,
+                'Created-By'       : "Gradle ${gradle.gradleVersion}"
+        )
+    }
+    launchScript() {
+        properties 'initInfoProvides': rootProject.name
+    }
+}

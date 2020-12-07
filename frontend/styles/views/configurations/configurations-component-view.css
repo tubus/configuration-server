@@ -1,0 +1,4 @@
+#component-row {
+    background-color: var(--lumo-primary-color);
+    border-radius: 25px;
+}

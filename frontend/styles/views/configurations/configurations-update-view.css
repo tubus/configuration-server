@@ -1,0 +1,19 @@
+#tree-grid-configuration {
+    border-radius: 25px;
+    border-style: none;
+    background: var(--lumo-base-color);
+    backface-visibility: visible;
+}
+
+#component-name-field {
+    text-decoration-color: red;
+    font-weight: bolder;
+    text-align: center;
+    background-color: rgba(139, 255, 255, 0.3);
+    border-radius: 10px;
+    font-family: "Droid Serif";
+}
+
+vaadin-grid-cell-content {
+    background-color: rgba(255, 255, 255, 0.0);
+}

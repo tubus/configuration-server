@@ -1,0 +1,16 @@
+body {
+    background-color: var(--lumo-primary-background-color);
+}
+
+#logo-image {
+    height: 40%;
+    width: 20%;
+}
+
+#main-login-form vaadin-button {
+    background-color: var(--lumo-success-color-50pct);
+}
+
+#main-login-form vaadin-button:hover {
+    background-color: var(--lumo-success-color-10pct);
+}

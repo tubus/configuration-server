@@ -1,0 +1,87 @@
+server:
+  port: 8080
+  address: 0.0.0.0
+  servlet:
+    session:
+      persistent: false
+
+logo:
+  url: "icons/icon.svg"
+
+logging:
+  level:
+    org.atmosphere: warn
+
+spring:
+  application:
+    name: Configuration server UI
+    admin:
+      enabled: true
+  mustache:
+    check-template-location: false
+  devtools:
+    restart:
+      log-condition-evaluation-delta: false
+  jmx:
+    enabled: true
+    default-domain: configuration-server-ui
+
+  jpa:
+    hibernate:
+      naming-strategy: org.hibernate.cfg.ImprovedNamingStrategy
+      ddl-auto: none
+
+    database-platform: org.hibernate.dialect.PostgreSQL10Dialect
+#    show-sql: true
+    generate-ddl: false
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 4096
+        temp:
+          use_jdbc_metadata_defaults: false
+
+  datasource:
+    gcs:
+      jdbcUrl: jdbc:postgresql://localhost:5432/gcs
+      driver-class-name: org.postgresql.Driver
+      testWhileIdle: true
+      validationQuery: "SELECT 1"
+      username: postgres
+      password: postgres
+
+---
+spring:
+  profiles: config-server
+  jmx:
+    enabled: true
+    default-domain: config-server-application
+
+  application:
+    name: config-server-application
+    admin:
+      jmx-name: org.springframework.boot:name=ConfigServerApplication
+      enabled: true
+  security:
+    user:
+      name: root
+      password: s3cr3t
+
+server:
+  port: 8081
+
+---
+spring:
+  profiles: extended-log
+
+  jpa:
+    properties:
+      hibernate:
+        show_sql: true
+
+logging:
+  level:
+    org:
+      hibernate:
+        sql: debug
+        type: trace

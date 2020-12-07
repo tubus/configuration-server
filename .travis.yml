@@ -1,0 +1,18 @@
+language: java
+install: skip
+
+os: linux
+dist: trusty
+jdk: oraclejdk11
+node_js:
+  - 15
+
+before_install:
+  - wget https://services.gradle.org/distributions/gradle-6.7-bin.zip
+  - unzip -qq gradle-6.7-bin.zip
+  - export GRADLE_HOME=$PWD/gradle-6.7
+  - export PATH=$GRADLE_HOME/bin:$PATH
+  - gradle -v
+
+script:
+  gradle assemble

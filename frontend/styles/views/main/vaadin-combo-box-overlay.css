@@ -1,0 +1,7 @@
+[part="overlay"] {
+    color: var(--lumo-header-text-color);
+    background-color: var(--lumo-primary-contrast-color);
+    width: 350px;
+    child-align: middle;
+    justify-content: stretch;
+}
